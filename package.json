@@ -1,28 +1,22 @@
 {
-  "name": "oakranchfarm",
+  "name": "oakranchfarm-api",
   "version": "1.0.0",
-  "description": "Farm Api",
-  "main": "oakranchnode.js",
+  "description": "Oak Ranch Farm Serverless API",
+  "main": "api/index.js",
   "engines": {
     "node": "20.x"
   },
   "scripts": {
-    "start": "node oakranchnode.js",
-    "dev": "nodemon oakranchnode.js"
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js"
   },
   "dependencies": {
-    "@getbrevo/brevo": "^2.2.0",
-    "axios": "^1.6.0",
-    "bcryptjs": "^2.4.3",
-    "chalk": "^4.1.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.0",
     "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.2",
+    "serverless-http": "^3.2.0",
     "mongodb": "^6.3.0",
-    "mongoose": "^8.6.0",
-    "morgan": "^1.10.0",
-    "serverless-http": "^3.2.0"
+    "dotenv": "^16.0.0",
+    "cors": "^2.8.5",
+    "chalk": "^4.1.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
