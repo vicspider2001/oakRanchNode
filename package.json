@@ -1,6 +1,9 @@
 {
   "name": "oakranchfarm",
   "version": "1.0.0",
+  "engines": {
+    "node": "20.x"
+  },
   "description": "Farm Api",
   "main": "oakranchnode.js",
   "scripts": {
@@ -8,7 +11,7 @@
     "dev": "nodemon oakranchnode.js"
   },
   "keywords": [
-    "Hotel",
+    "Farm",
     "Api"
   ],
   "author": "Ikem and Zara",
