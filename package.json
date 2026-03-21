@@ -1,0 +1,34 @@
+{
+  "name": "footynz",
+  "version": "1.0.0",
+  "description": "Lifestyle Shopping",
+  "main": "index.js",
+  "scripts": {
+    "start": "node footynzNode.js",
+    "dev": "nodemon footynzNode.js"
+  },
+  "keywords": [
+    "Hotel",
+    "Api"
+  ],
+  "author": "Ikem and Zara",
+  "license": "ISC",
+  "dependencies": {
+    "@getbrevo/brevo": "^2.2.0",
+    "axios": "^0.25.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "chalk": "^5.3.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^14.3.2",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "localtunnel": "^2.0.2",
+    "mongodb": "^4.17.2",
+    "mongoose": "^8.6.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.0.1",
+    "yarn": "^1.22.22"
+  }
+}
