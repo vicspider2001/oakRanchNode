@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/oakranchnode.js" }
+  ],
+  "functions": {
+    "oakranchnode.js": {
+      "runtime": "vercel-node@latest"
+    }
+  }
+}
