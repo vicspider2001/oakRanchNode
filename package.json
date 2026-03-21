@@ -1,11 +1,11 @@
 {
-  "name": "footynz",
+  "name": "oakranchfarm",
   "version": "1.0.0",
-  "description": "Lifestyle Shopping",
-  "main": "index.js",
+  "description": "Farm Api",
+  "main": "oakranchnode.js",
   "scripts": {
-    "start": "node footynzNode.js",
-    "dev": "nodemon footynzNode.js"
+    "start": "node oakranchnode.js",
+    "dev": "nodemon oakranchnode.js"
   },
   "keywords": [
     "Hotel",
