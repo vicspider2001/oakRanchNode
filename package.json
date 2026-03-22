@@ -2,7 +2,7 @@
   "name": "oakfarm",
   "version": "1.0.0",
   "description": "Farming",
-  "main": "index.js",
+  "main": "oakfarming.js",
   "scripts": {
     "start": "node oakfarming.js",
     "dev": "nodemon oakfarming.js"
