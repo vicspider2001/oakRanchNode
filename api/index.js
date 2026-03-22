@@ -1,32 +1,42 @@
 const express = require('express');
-const serverless = require('serverless-http'); // Import this
+const serverless = require('serverless-http');
 const dotenv = require('dotenv');
-const { MongoClient, ObjectId } = require('mongodb'); // Modern destructuring
+const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 
 dotenv.config();
 
 const footynz = express();
 const MongoUrl = process.env.MongoOnline;
-let db;
+let cachedClient = null;
+let cachedDb = null;
 
 // Middleware
-footynz.use(express.json()); // Use built-in express.json instead of body-parser
+footynz.use(express.json());
 footynz.use(express.urlencoded({ extended: true }));
+
+// FIX: Remove the trailing slash from origin and fix double semicolon
 footynz.use(cors({
-    origin: "https://oakranchfarm.netlify.app/", // Replace with your actual Netlify URL
+    origin: "https://oakranchfarm.netlify.app", 
     methods: ["GET", "POST"],
     credentials: true
-}));;
+}));
 
 // --- DATABASE CONNECTION HELPER ---
-// Serverless functions need to reuse the DB connection
 async function connectDB() {
-    if (db) return db;
-    const client = new MongoClient(MongoUrl);
-    await client.connect();
-    db = client.db('aokRanchData');
-    return db;
+    // Reuse connection to prevent 504 timeouts on Vercel
+    if (cachedDb) return cachedDb;
+
+    if (!cachedClient) {
+        cachedClient = new MongoClient(MongoUrl, {
+            connectTimeoutMS: 10000, // Give up after 10s
+            serverSelectionTimeoutMS: 10000
+        });
+        await cachedClient.connect();
+    }
+
+    cachedDb = cachedClient.db('aokRanchData');
+    return cachedDb;
 }
 
 // --- ROUTES ---
@@ -35,7 +45,7 @@ footynz.get('/', (req, res) => {
     res.send("Welcome to Oak Ranch Farm - Farm Api Active");
 });
 
-// 1. GET ALL PRODUCE (For Shop.jsx)
+// 1. GET ALL PRODUCE
 footynz.get('/api/produce', async (req, res) => {
     try {
         const database = await connectDB();
@@ -46,21 +56,26 @@ footynz.get('/api/produce', async (req, res) => {
     }
 });
 
-// 2. GET SINGLE PRODUCT BY ID (For ProductDetail.jsx)
+// 2. GET SINGLE PRODUCT BY ID
 footynz.get('/api/produce/:id', async (req, res) => {
     try {
         const database = await connectDB();
         const id = req.params.id;
-        const result = await database.collection('produce').findOne({ _id: new ObjectId(id) });
         
+        // Ensure ID is valid format before querying
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const result = await database.collection('produce').findOne({ _id: new ObjectId(id) });
         if (!result) return res.status(404).json({ message: "Product not found" });
         res.status(200).json(result);
     } catch (err) {
-        res.status(500).json({ message: "Invalid ID format or Database Error" });
+        res.status(500).json({ message: "Database Error" });
     }
 });
 
-// 3. GET TRACEABILITY DATA (For Traceability.jsx)
+// 3. GET TRACEABILITY DATA
 footynz.get('/api/trace/:id', async (req, res) => {
     try {
         const database = await connectDB();
@@ -68,21 +83,23 @@ footynz.get('/api/trace/:id', async (req, res) => {
         const batch = await database.collection('batches').findOne({ serialNumber: serial });
 
         if (!batch) {
-            return res.status(404).json({ message: "Serial number not found in our registry." });
+            return res.status(404).json({ message: "Serial number not found." });
         }
         res.json(batch);
     } catch (err) {
-        console.error("Database Error:", err);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
 
 // --- VERCEL EXPORT ---
-// Instead of footynz.listen, we wrap it for serverless
 const handler = serverless(footynz);
 
 module.exports = async (req, res) => {
-    // This ensures MongoDB is connected before the request is handled
-    await connectDB();
-    return await handler(req, res);
+    try {
+        await connectDB();
+        return await handler(req, res);
+    } catch (error) {
+        console.error("Critical Error:", error);
+        res.status(500).send("Database Connection Failed");
+    }
 };
