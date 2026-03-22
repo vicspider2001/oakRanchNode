@@ -13,7 +13,11 @@ let db;
 // Middleware
 footynz.use(express.json()); // Use built-in express.json instead of body-parser
 footynz.use(express.urlencoded({ extended: true }));
-footynz.use(cors());
+footynz.use(cors({
+    origin: "https://oakranchfarm.netlify.app/", // Replace with your actual Netlify URL
+    methods: ["GET", "POST"],
+    credentials: true
+}));;
 
 // --- DATABASE CONNECTION HELPER ---
 // Serverless functions need to reuse the DB connection
