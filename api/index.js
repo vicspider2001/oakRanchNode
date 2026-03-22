@@ -8,14 +8,14 @@ dotenv.config();
 
 const footynz = express();
 const MongoUrl = process.env.MongoOnline;
+
+// Connection Caching (must be outside the handler)
 let cachedClient = null;
 let cachedDb = null;
 
 // Middleware
 footynz.use(express.json());
 footynz.use(express.urlencoded({ extended: true }));
-
-// FIX: Remove the trailing slash from origin and fix double semicolon
 footynz.use(cors({
     origin: "https://oakranchfarm.netlify.app", 
     methods: ["GET", "POST"],
@@ -24,13 +24,14 @@ footynz.use(cors({
 
 // --- DATABASE CONNECTION HELPER ---
 async function connectDB() {
-    // Reuse connection to prevent 504 timeouts on Vercel
     if (cachedDb) return cachedDb;
 
     if (!cachedClient) {
         cachedClient = new MongoClient(MongoUrl, {
-            connectTimeoutMS: 10000, // Give up after 10s
-            serverSelectionTimeoutMS: 10000
+            // These settings prevent the "spinning" by timing out faster
+            connectTimeoutMS: 5000, 
+            serverSelectionTimeoutMS: 5000,
+            maxIdleTimeMS: 10000,
         });
         await cachedClient.connect();
     }
@@ -52,6 +53,7 @@ footynz.get('/api/produce', async (req, res) => {
         const result = await database.collection('produce').find().toArray();
         res.status(200).json(result);
     } catch (err) {
+        console.error("Fetch Produce Error:", err);
         res.status(500).json({ message: "Error fetching harvest data" });
     }
 });
@@ -62,7 +64,6 @@ footynz.get('/api/produce/:id', async (req, res) => {
         const database = await connectDB();
         const id = req.params.id;
         
-        // Ensure ID is valid format before querying
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ message: "Invalid ID format" });
         }
@@ -95,11 +96,16 @@ footynz.get('/api/trace/:id', async (req, res) => {
 const handler = serverless(footynz);
 
 module.exports = async (req, res) => {
+    // Force the database to connect before processing the request
     try {
         await connectDB();
+        // Return the handler result directly
         return await handler(req, res);
     } catch (error) {
-        console.error("Critical Error:", error);
-        res.status(500).send("Database Connection Failed");
+        console.error("Startup Error:", error);
+        // Ensure we send a response so it doesn't spin forever
+        if (!res.headersSent) {
+            res.status(500).send("Server Error during initialization");
+        }
     }
 };
