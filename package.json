@@ -1,11 +1,11 @@
 {
-  "name": "footynz",
+  "name": "oakfarm",
   "version": "1.0.0",
-  "description": "Lifestyle Shopping",
+  "description": "Farming",
   "main": "index.js",
   "scripts": {
-    "start": "node footynzNode.js",
-    "dev": "nodemon footynzNode.js"
+    "start": "node oakfarming.js",
+    "dev": "nodemon oakfarming.js"
   },
   "keywords": [
     "Hotel",

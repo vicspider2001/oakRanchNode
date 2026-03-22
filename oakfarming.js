@@ -1,5 +1,5 @@
 var express = require('express');
-var footynz = express();
+var oak = express();
 var dotenv = require('dotenv');
 var mongo = require('mongodb');
 var MongoClient = mongo.MongoClient;
@@ -15,18 +15,18 @@ var port = process.env.PORT || 80;
 var db;
 
 
-footynz.use(bodyparser.urlencoded({extended:true}));
-footynz.use(bodyparser.json());
-footynz.use(cors());
+oak.use(bodyparser.urlencoded({extended:true}));
+oak.use(bodyparser.json());
+oak.use(cors());
 
 
 // Assuming 'db' is your connected MongoDB database instance
-footynz.get('/',(req,res)=>{
+oak.get('/',(req,res)=>{
     res.send("Welcome to Oak Ranch Farm - Farm Api Active")
 })
 
 // 1. GET ALL PRODUCE (For Shop.jsx)
-footynz.get('/api/produce', (req, res) => {
+oak.get('/api/produce', (req, res) => {
     // We access the collection 'produce' inside your 'aokRanchData' DB
     db.collection('produce').find().toArray((err, result) => {
         if (err) res.status(500).send("Error fetching harvest data");
@@ -35,7 +35,7 @@ footynz.get('/api/produce', (req, res) => {
 });
 
 // 2. GET SINGLE PRODUCT BY ID (For ProductDetail.jsx)
-footynz.get('/api/produce/:id', (req, res) => {
+oak.get('/api/produce/:id', (req, res) => {
     var id = req.params.id;
     // We must convert the string ID to a MongoDB ObjectID
     db.collection('produce').findOne({ _id: new mongo.ObjectId(id) }, (err, result) => {
@@ -46,7 +46,7 @@ footynz.get('/api/produce/:id', (req, res) => {
 });
 
 // GET /api/trace/:id
-footynz.get('/api/trace/:id', async (req, res) => {
+oak.get('/api/trace/:id', async (req, res) => {
     try {
       const serial = req.params.id;
       
@@ -67,7 +67,7 @@ footynz.get('/api/trace/:id', async (req, res) => {
 MongoClient.connect(MongoUrl, (err,client) => {
     if(err) console.log("error while connecting");
     db = client.db('aokRanchData');
-    footynz.listen(port, '0.0.0.0',()=>{
+    oak.listen(port, '0.0.0.0',()=>{
         console.log(`listening on port ${port}`)
     })
 })
